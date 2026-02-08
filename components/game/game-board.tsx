@@ -24,16 +24,16 @@ export function GameBoard({
 }: GameBoardProps) {
   const boardSize = GRID_SIZE * cellSize + (GRID_SIZE + 1) * 2;
 
-  // Calculate ghost preview cells
+  // Calculate ghost preview cells -- only show when placement is valid
   const ghostCells = new Map<string, string>();
   const canPlace = dragPiece && dragGridPos ? canPlacePiece(grid, dragPiece, dragGridPos.row, dragGridPos.col) : false;
 
-  if (dragPiece && dragGridPos) {
+  if (dragPiece && dragGridPos && canPlace) {
     for (const [r, c] of dragPiece.cells) {
       const gr = dragGridPos.row + r;
       const gc = dragGridPos.col + c;
       if (gr >= 0 && gr < GRID_SIZE && gc >= 0 && gc < GRID_SIZE) {
-        ghostCells.set(`${gr}-${gc}`, canPlace ? dragPiece.color : "__invalid__");
+        ghostCells.set(`${gr}-${gc}`, dragPiece.color);
       }
     }
   }
@@ -79,16 +79,11 @@ export function GameBoard({
                 key={key}
                 onPointerUp={() => onCellPointerUp(r, c)}
               >
-                {ghostColor && ghostColor !== "__invalid__" && !cell ? (
+                {ghostColor && !cell ? (
                   <BlockCell
                     color={ghostColor as BlockColorName}
                     size={cellSize}
                     ghost
-                  />
-                ) : ghostColor === "__invalid__" ? (
-                  <div
-                    style={{ width: cellSize, height: cellSize }}
-                    className="rounded-[2px] bg-red-500/20 border-2 border-red-500/40"
                   />
                 ) : (
                   <BlockCell
