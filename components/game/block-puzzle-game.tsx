@@ -9,9 +9,12 @@ import {
   checkAndClearLines,
   calculateScore,
   canAnyPieceBePlaced,
+  getPieceBounds,
   GRID_SIZE,
+  BLOCK_COLORS,
   type Grid,
   type PieceShape,
+  type BlockColorName,
 } from "@/lib/game-logic";
 import { GameBoard } from "./game-board";
 import { PieceTray } from "./piece-tray";
@@ -173,51 +176,60 @@ export function BlockPuzzleGame() {
     [pieces]
   );
 
+  // --- Helper: convert pointer coords to grid row/col ---
+  // The floating piece is shown 60px above the finger, so we map the
+  // *center of that floating piece* onto the board to decide the grid cell.
+  const calcGridFromPointer = useCallback(
+    (clientX: number, clientY: number, piece: PieceShape | null) => {
+      if (!boardRef.current || !piece) return null;
+      const rect = boardRef.current.getBoundingClientRect();
+      const cellStep = cellSize + 2; // cell + gap
+
+      // The floating piece is drawn with its center at (clientX, clientY - 60 - h/2).
+      // We want the *top-left cell* of the piece to map onto the grid.
+      const bounds = getPieceBounds(piece);
+      const pieceW = bounds.cols * cellStep;
+      const pieceH = bounds.rows * cellStep;
+
+      // Where the floating piece's top-left corner would be:
+      const floatTopLeftX = clientX - pieceW / 2;
+      const floatTopLeftY = clientY - 60 - pieceH;
+
+      // Center of the floating piece's top-left cell:
+      const cellCenterX = floatTopLeftX + cellStep / 2;
+      const cellCenterY = floatTopLeftY + cellStep / 2;
+
+      // Convert to grid coordinates
+      const col = Math.round((cellCenterX - rect.left - 2 - cellSize / 2) / cellStep);
+      const row = Math.round((cellCenterY - rect.top - 2 - cellSize / 2) / cellStep);
+
+      if (row >= -1 && row < GRID_SIZE + 1 && col >= -1 && col < GRID_SIZE + 1) {
+        return { row, col };
+      }
+      return null;
+    },
+    [cellSize]
+  );
+
   // --- Global pointer move / up for drag ---
   useEffect(() => {
     if (draggingPieceIndex === null) return;
+    const piece = pieces[draggingPieceIndex];
 
     function handlePointerMove(e: PointerEvent) {
       e.preventDefault();
       setDragPos({ x: e.clientX, y: e.clientY });
 
-      // Check if over the board
-      if (boardRef.current) {
-        const rect = boardRef.current.getBoundingClientRect();
-        // Use a position above the finger for mobile so user can see the piece
-        const touchOffsetY = 80;
-        const x = e.clientX - rect.left;
-        const y = e.clientY - touchOffsetY - rect.top;
-        const col = Math.floor((x - 2) / (cellSize + 2));
-        const row = Math.floor((y - 2) / (cellSize + 2));
-        if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
-          setDragGridPos({ row, col });
-        } else {
-          setDragGridPos(null);
-        }
-      }
+      const gp = calcGridFromPointer(e.clientX, e.clientY, piece);
+      setDragGridPos(gp);
     }
 
     function handlePointerUp(e: PointerEvent) {
       if (draggingPieceIndex === null) return;
 
-      // Try to place piece
-      if (boardRef.current) {
-        const rect = boardRef.current.getBoundingClientRect();
-        const touchOffsetY = 80;
-        const x = e.clientX - rect.left;
-        const y = e.clientY - touchOffsetY - rect.top;
-        const col = Math.floor((x - 2) / (cellSize + 2));
-        const row = Math.floor((y - 2) / (cellSize + 2));
-
-        if (
-          row >= 0 &&
-          row < GRID_SIZE &&
-          col >= 0 &&
-          col < GRID_SIZE
-        ) {
-          doPlacePiece(draggingPieceIndex, row, col);
-        }
+      const gp = calcGridFromPointer(e.clientX, e.clientY, piece);
+      if (gp && piece) {
+        doPlacePiece(draggingPieceIndex, gp.row, gp.col);
       }
 
       setDraggingPieceIndex(null);
@@ -234,7 +246,7 @@ export function BlockPuzzleGame() {
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
     };
-  }, [draggingPieceIndex, cellSize, doPlacePiece]);
+  }, [draggingPieceIndex, pieces, cellSize, doPlacePiece, calcGridFromPointer]);
 
   // --- Get dragged piece for ghost preview on board ---
   const draggedPiece = draggingPieceIndex !== null ? pieces[draggingPieceIndex] : null;
@@ -303,8 +315,6 @@ export function BlockPuzzleGame() {
 }
 
 // Floating piece that follows pointer during drag
-import { BLOCK_COLORS, getPieceBounds, type BlockColorName } from "@/lib/game-logic";
-
 function DragFloatingPiece({
   piece,
   pos,

@@ -1,6 +1,6 @@
 "use client";
 
-import { type Grid, GRID_SIZE, type PieceShape, canPlacePiece } from "@/lib/game-logic";
+import { type Grid, GRID_SIZE, type PieceShape, canPlacePiece, type BlockColorName } from "@/lib/game-logic";
 import { BlockCell } from "./block-cell";
 
 interface GameBoardProps {
@@ -26,11 +26,15 @@ export function GameBoard({
 
   // Calculate ghost preview cells
   const ghostCells = new Map<string, string>();
-  if (dragPiece && dragGridPos && canPlacePiece(grid, dragPiece, dragGridPos.row, dragGridPos.col)) {
+  const canPlace = dragPiece && dragGridPos ? canPlacePiece(grid, dragPiece, dragGridPos.row, dragGridPos.col) : false;
+
+  if (dragPiece && dragGridPos) {
     for (const [r, c] of dragPiece.cells) {
       const gr = dragGridPos.row + r;
       const gc = dragGridPos.col + c;
-      ghostCells.set(`${gr}-${gc}`, dragPiece.color);
+      if (gr >= 0 && gr < GRID_SIZE && gc >= 0 && gc < GRID_SIZE) {
+        ghostCells.set(`${gr}-${gc}`, canPlace ? dragPiece.color : "__invalid__");
+      }
     }
   }
 
@@ -75,11 +79,16 @@ export function GameBoard({
                 key={key}
                 onPointerUp={() => onCellPointerUp(r, c)}
               >
-                {ghostColor && !cell ? (
+                {ghostColor && ghostColor !== "__invalid__" && !cell ? (
                   <BlockCell
-                    color={ghostColor as any}
+                    color={ghostColor as BlockColorName}
                     size={cellSize}
                     ghost
+                  />
+                ) : ghostColor === "__invalid__" ? (
+                  <div
+                    style={{ width: cellSize, height: cellSize }}
+                    className="rounded-[2px] bg-red-500/20 border-2 border-red-500/40"
                   />
                 ) : (
                   <BlockCell
