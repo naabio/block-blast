@@ -1,15 +1,19 @@
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import React from "react"
+import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
 
 import './globals.css'
 
-const _geist = Geist({ subsets: ['latin'] })
-const _geistMono = Geist_Mono({ subsets: ['latin'] })
+const _inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'Block Puzzle',
+  description: 'A fun hyper-casual block puzzle game',
+}
+
+export const viewport: Viewport = {
+  themeColor: '#3b5998',
+  userScalable: false,
 }
 
 export default function RootLayout({
@@ -19,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased overflow-hidden">{children}</body>
     </html>
   )
 }
