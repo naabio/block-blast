@@ -46,3 +46,58 @@
     text-wrap: balance;
   }
 }
+
+/* Line clear glow sweep animation */
+@keyframes lineClearGlow {
+  0% { opacity: 0; transform: scaleX(0); }
+  30% { opacity: 1; transform: scaleX(1); }
+  60% { opacity: 1; }
+  100% { opacity: 0; transform: scaleX(1.05); }
+}
+@keyframes lineClearGlowY {
+  0% { opacity: 0; transform: scaleY(0); }
+  30% { opacity: 1; transform: scaleY(1); }
+  60% { opacity: 1; }
+  100% { opacity: 0; transform: scaleY(1.05); }
+}
+@keyframes cellPop {
+  0% { transform: scale(1); filter: brightness(1); }
+  25% { transform: scale(1.15); filter: brightness(2.5); }
+  50% { transform: scale(1.05); filter: brightness(1.8); }
+  100% { transform: scale(0); filter: brightness(3); opacity: 0; }
+}
+
+/* New high score animations */
+@keyframes highScoreBounce {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  40% { transform: scale(1.2) rotate(3deg); opacity: 1; }
+  60% { transform: scale(0.95) rotate(-1deg); }
+  80% { transform: scale(1.05) rotate(0deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes crownBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(-8deg); }
+  50% { transform: translateY(-3px) rotate(4deg); }
+  75% { transform: translateY(-5px) rotate(-3deg); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+/* Board LED border pulse when clearing */
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Board LED dot animation */
+@keyframes ledDot {
+  0%, 100% { opacity: 0.3; box-shadow: 0 0 2px currentColor; }
+  50% { opacity: 1; box-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
+}

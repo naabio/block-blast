@@ -21,6 +21,7 @@ import { PieceTray } from "./piece-tray";
 import { ScoreHeader, CurrentScore } from "./score-header";
 import { GameOverScreen } from "./game-over-screen";
 import { StartScreen } from "./start-screen";
+import { NewHighScoreBanner } from "./new-high-score-banner";
 
 type GameState = "start" | "playing" | "gameover";
 
@@ -47,6 +48,7 @@ export function BlockPuzzleGame() {
   const [clearingRows, setClearingRows] = useState<number[]>([]);
   const [clearingCols, setClearingCols] = useState<number[]>([]);
   const [scoreAnimation, setScoreAnimation] = useState(false);
+  const [showHighScoreBanner, setShowHighScoreBanner] = useState(false);
 
   // Drag state
   const [draggingPieceIndex, setDraggingPieceIndex] = useState<number | null>(null);
@@ -83,6 +85,7 @@ export function BlockPuzzleGame() {
     setPieces(generatePieceSet());
     setScore(0);
     setIsNewHighScore(false);
+    setShowHighScoreBanner(false);
     setDraggingPieceIndex(null);
     setDragPos(null);
     setDragGridPos(null);
@@ -110,7 +113,7 @@ export function BlockPuzzleGame() {
           setGrid(result.newGrid);
           setClearingRows([]);
           setClearingCols([]);
-        }, 300);
+        }, 550);
       } else {
         setGrid(newGrid);
       }
@@ -123,7 +126,10 @@ export function BlockPuzzleGame() {
       if (newScore > highScore) {
         setHighScore(newScore);
         saveHighScore(newScore);
-        setIsNewHighScore(true);
+        if (!isNewHighScore) {
+          setIsNewHighScore(true);
+          setShowHighScoreBanner(true);
+        }
       }
 
       const newPieces = [...pieces];
@@ -269,6 +275,9 @@ export function BlockPuzzleGame() {
 
       {/* Current Score */}
       <CurrentScore score={score} scoreAnimation={scoreAnimation} />
+
+      {/* New High Score Banner */}
+      <NewHighScoreBanner show={showHighScoreBanner} />
 
       {/* Game Board */}
       <div ref={boardRef} className="relative">

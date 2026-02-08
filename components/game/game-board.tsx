@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { type Grid, GRID_SIZE, type PieceShape, canPlacePiece, type BlockColorName } from "@/lib/game-logic";
 import { BlockCell } from "./block-cell";
 
@@ -13,6 +14,31 @@ interface GameBoardProps {
   onCellPointerUp: (row: number, col: number) => void;
 }
 
+// LED dot positions around the board border
+function useLedDots(boardSize: number, count: number) {
+  return useMemo(() => {
+    const dots: { x: number; y: number; delay: number }[] = [];
+    const perimeter = boardSize * 4;
+    const spacing = perimeter / count;
+    for (let i = 0; i < count; i++) {
+      const d = i * spacing;
+      let x = 0;
+      let y = 0;
+      if (d < boardSize) {
+        x = d; y = 0; // top
+      } else if (d < boardSize * 2) {
+        x = boardSize; y = d - boardSize; // right
+      } else if (d < boardSize * 3) {
+        x = boardSize - (d - boardSize * 2); y = boardSize; // bottom
+      } else {
+        x = 0; y = boardSize - (d - boardSize * 3); // left
+      }
+      dots.push({ x, y, delay: i * 0.06 });
+    }
+    return dots;
+  }, [boardSize, count]);
+}
+
 export function GameBoard({
   grid,
   cellSize,
@@ -23,6 +49,8 @@ export function GameBoard({
   onCellPointerUp,
 }: GameBoardProps) {
   const boardSize = GRID_SIZE * cellSize + (GRID_SIZE + 1) * 2;
+  const isClearing = clearingRows.length > 0 || clearingCols.length > 0;
+  const ledDots = useLedDots(boardSize, 40);
 
   // Calculate ghost preview cells -- only show when placement is valid
   const ghostCells = new Map<string, string>();
@@ -40,62 +68,119 @@ export function GameBoard({
 
   return (
     <div
-      className="relative rounded-lg overflow-hidden"
+      className="relative rounded-lg"
       style={{
-        width: boardSize,
-        height: boardSize,
-        background: "hsl(225, 40%, 14%)",
-        boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.15)",
-        border: "2px solid hsl(225, 35%, 25%)",
+        width: boardSize + 16,
+        height: boardSize + 16,
+        padding: 8,
       }}
     >
-      {/* LED border glow */}
-      <div
-        className="absolute -inset-[3px] rounded-lg pointer-events-none"
-        style={{
-          border: "3px solid transparent",
-          borderImage: "linear-gradient(135deg, #22c55e, #3b82f6, #22c55e, #3b82f6) 1",
-          opacity: 0.4,
-        }}
-      />
+      {/* LED dots around border */}
+      {ledDots.map((dot, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: 5,
+            height: 5,
+            left: dot.x + 8 - 2.5,
+            top: dot.y + 8 - 2.5,
+            backgroundColor: isClearing ? "#22c55e" : "#22c55e",
+            opacity: isClearing ? 1 : 0.35,
+            boxShadow: isClearing
+              ? `0 0 6px #22c55e, 0 0 12px #22c55e80`
+              : `0 0 3px #22c55e60`,
+            animation: isClearing ? `ledDot 0.4s ease-in-out infinite` : "none",
+            animationDelay: `${dot.delay}s`,
+            transition: "opacity 0.3s, box-shadow 0.3s",
+          }}
+        />
+      ))}
 
-      {/* Grid */}
+      {/* Board inner */}
       <div
-        className="grid"
+        className="relative rounded-lg overflow-hidden"
         style={{
-          gridTemplateColumns: `repeat(${GRID_SIZE}, ${cellSize}px)`,
-          gap: "2px",
-          padding: "2px",
+          width: boardSize,
+          height: boardSize,
+          background: "hsl(225, 40%, 14%)",
+          boxShadow: isClearing
+            ? "inset 0 2px 8px rgba(0,0,0,0.5), 0 0 30px rgba(34,197,94,0.4), 0 0 60px rgba(34,197,94,0.15)"
+            : "inset 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.15)",
+          border: `2px solid ${isClearing ? "rgba(34,197,94,0.5)" : "hsl(225, 35%, 25%)"}`,
+          transition: "box-shadow 0.3s, border-color 0.3s",
         }}
       >
-        {grid.map((row, r) =>
-          row.map((cell, c) => {
-            const key = `${r}-${c}`;
-            const isClearing = clearingRows.includes(r) || clearingCols.includes(c);
-            const ghostColor = ghostCells.get(key);
+        {/* Line clear glow bars -- horizontal */}
+        {clearingRows.map((row) => (
+          <div
+            key={`row-glow-${row}`}
+            className="absolute left-0 right-0 pointer-events-none z-10"
+            style={{
+              top: 2 + row * (cellSize + 2),
+              height: cellSize,
+              background: "linear-gradient(90deg, transparent, rgba(34,197,94,0.6), rgba(150,255,150,0.9), rgba(34,197,94,0.6), transparent)",
+              boxShadow: "0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.4)",
+              animation: "lineClearGlow 0.5s ease-out forwards",
+              transformOrigin: "center",
+            }}
+          />
+        ))}
 
-            return (
-              <div
-                key={key}
-                onPointerUp={() => onCellPointerUp(r, c)}
-              >
-                {ghostColor && !cell ? (
-                  <BlockCell
-                    color={ghostColor as BlockColorName}
-                    size={cellSize}
-                    ghost
-                  />
-                ) : (
-                  <BlockCell
-                    color={cell}
-                    size={cellSize}
-                    isClearing={isClearing}
-                  />
-                )}
-              </div>
-            );
-          })
-        )}
+        {/* Line clear glow bars -- vertical */}
+        {clearingCols.map((col) => (
+          <div
+            key={`col-glow-${col}`}
+            className="absolute top-0 bottom-0 pointer-events-none z-10"
+            style={{
+              left: 2 + col * (cellSize + 2),
+              width: cellSize,
+              background: "linear-gradient(180deg, transparent, rgba(34,197,94,0.6), rgba(150,255,150,0.9), rgba(34,197,94,0.6), transparent)",
+              boxShadow: "0 0 20px rgba(34,197,94,0.8), 0 0 40px rgba(34,197,94,0.4)",
+              animation: "lineClearGlowY 0.5s ease-out forwards",
+              transformOrigin: "center",
+            }}
+          />
+        ))}
+
+        {/* Grid */}
+        <div
+          className="grid relative z-0"
+          style={{
+            gridTemplateColumns: `repeat(${GRID_SIZE}, ${cellSize}px)`,
+            gap: "2px",
+            padding: "2px",
+          }}
+        >
+          {grid.map((row, r) =>
+            row.map((cell, c) => {
+              const key = `${r}-${c}`;
+              const isCellClearing = clearingRows.includes(r) || clearingCols.includes(c);
+              const ghostColor = ghostCells.get(key);
+
+              return (
+                <div
+                  key={key}
+                  onPointerUp={() => onCellPointerUp(r, c)}
+                >
+                  {ghostColor && !cell ? (
+                    <BlockCell
+                      color={ghostColor as BlockColorName}
+                      size={cellSize}
+                      ghost
+                    />
+                  ) : (
+                    <BlockCell
+                      color={cell}
+                      size={cellSize}
+                      isClearing={isCellClearing}
+                    />
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );

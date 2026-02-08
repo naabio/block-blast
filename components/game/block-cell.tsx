@@ -33,27 +33,24 @@ export function BlockCell({
       style={{
         width: size,
         height: size,
-        opacity: ghost ? 0.4 : isClearing ? 0 : 1,
-        transform: isClearing ? "scale(0)" : "scale(1)",
-        transition: isClearing
-          ? "all 0.3s ease-out"
-          : isPreview
-            ? "none"
-            : "all 0.1s ease",
+        animation: isClearing ? "cellPop 0.5s ease-out forwards" : "none",
       }}
       className="rounded-[3px] relative overflow-hidden"
     >
       {/* Base color */}
       <div
         className="absolute inset-0 rounded-[3px]"
-        style={{ backgroundColor: c.base }}
+        style={{
+          backgroundColor: c.base,
+          opacity: ghost ? 0.45 : 1,
+        }}
       />
       {/* 3D top highlight */}
       <div
         className="absolute inset-x-0 top-0 h-[35%] rounded-t-[3px]"
         style={{
           background: `linear-gradient(to bottom, ${c.light}, transparent)`,
-          opacity: 0.7,
+          opacity: ghost ? 0.3 : 0.7,
         }}
       />
       {/* 3D left highlight */}
@@ -61,7 +58,7 @@ export function BlockCell({
         className="absolute inset-y-0 left-0 w-[30%] rounded-l-[3px]"
         style={{
           background: `linear-gradient(to right, ${c.light}, transparent)`,
-          opacity: 0.3,
+          opacity: ghost ? 0.15 : 0.3,
         }}
       />
       {/* 3D bottom shadow */}
@@ -69,7 +66,7 @@ export function BlockCell({
         className="absolute inset-x-0 bottom-0 h-[25%] rounded-b-[3px]"
         style={{
           background: `linear-gradient(to top, ${c.dark}, transparent)`,
-          opacity: 0.8,
+          opacity: ghost ? 0.3 : 0.8,
         }}
       />
       {/* 3D right shadow */}
@@ -77,7 +74,7 @@ export function BlockCell({
         className="absolute inset-y-0 right-0 w-[25%] rounded-r-[3px]"
         style={{
           background: `linear-gradient(to left, ${c.dark}, transparent)`,
-          opacity: 0.5,
+          opacity: ghost ? 0.2 : 0.5,
         }}
       />
       {/* Center shine */}
@@ -87,6 +84,17 @@ export function BlockCell({
           background: `radial-gradient(ellipse, ${c.glow}40, transparent)`,
         }}
       />
+      {/* Clearing glow overlay */}
+      {isClearing && (
+        <div
+          className="absolute inset-0 rounded-[3px]"
+          style={{
+            background: `radial-gradient(circle, ${c.glow}, ${c.light}80, transparent)`,
+            boxShadow: `0 0 12px ${c.glow}, 0 0 24px ${c.glow}80`,
+            animation: "cellPop 0.5s ease-out forwards",
+          }}
+        />
+      )}
     </div>
   );
 }
