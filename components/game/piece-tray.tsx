@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useCallback } from "react";
 import type { PieceShape } from "@/lib/game-logic";
 import { getPieceBounds } from "@/lib/game-logic";
 import { BlockCell } from "./block-cell";
@@ -7,17 +8,31 @@ import { BlockCell } from "./block-cell";
 interface PieceTrayProps {
   pieces: (PieceShape | null)[];
   selectedPieceIndex: number | null;
-  onSelectPiece: (index: number) => void;
+  onDragStart: (index: number, clientX: number, clientY: number, offsetX: number, offsetY: number) => void;
   cellSize: number;
 }
 
 export function PieceTray({
   pieces,
   selectedPieceIndex,
-  onSelectPiece,
+  onDragStart,
   cellSize,
 }: PieceTrayProps) {
   const previewCellSize = Math.floor(cellSize * 0.65);
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent, index: number) => {
+      e.preventDefault();
+      // Capture pointer for smooth dragging
+      (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const offsetX = e.clientX - rect.left - rect.width / 2;
+      const offsetY = e.clientY - rect.top - rect.height / 2;
+      onDragStart(index, e.clientX, e.clientY, offsetX, offsetY);
+    },
+    [onDragStart]
+  );
 
   return (
     <div className="flex items-center justify-around w-full px-2 py-4">
@@ -36,24 +51,24 @@ export function PieceTray({
         }
 
         const bounds = getPieceBounds(piece);
-        const isSelected = selectedPieceIndex === i;
+        const isDragging = selectedPieceIndex === i;
 
         return (
-          <button
-            type="button"
+          <div
             key={i}
-            className="flex items-center justify-center rounded-lg transition-all duration-150"
+            className="flex items-center justify-center rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing"
             style={{
               width: previewCellSize * 5 + 16,
               height: previewCellSize * 5 + 16,
-              transform: isSelected ? "scale(1.15)" : "scale(1)",
-              background: isSelected ? "rgba(59,130,246,0.15)" : "transparent",
-              border: isSelected ? "2px solid rgba(59,130,246,0.4)" : "2px solid transparent",
+              opacity: isDragging ? 0.3 : 1,
+              transform: isDragging ? "scale(0.9)" : "scale(1)",
+              background: "transparent",
+              border: "2px solid transparent",
             }}
-            onClick={() => onSelectPiece(i)}
+            onPointerDown={(e) => handlePointerDown(e, i)}
           >
             <div
-              className="grid"
+              className="grid pointer-events-none"
               style={{
                 gridTemplateColumns: `repeat(${bounds.cols}, ${previewCellSize}px)`,
                 gridTemplateRows: `repeat(${bounds.rows}, ${previewCellSize}px)`,
@@ -86,7 +101,7 @@ export function PieceTray({
                 })
               )}
             </div>
-          </button>
+          </div>
         );
       })}
     </div>
