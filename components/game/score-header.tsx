@@ -10,7 +10,7 @@ interface ScoreHeaderProps {
 
 export function ScoreHeader({ score, highScore, onSettings }: ScoreHeaderProps) {
   return (
-    <div className="flex items-center justify-between w-full px-4 pt-2 pb-1">
+    <div className="flex items-center justify-between w-full px-4 pt-1 pb-0">
       {/* High Score */}
       <div className="flex items-center gap-1.5">
         <Crown className="w-6 h-6 text-amber-400 fill-amber-400" />
@@ -39,7 +39,7 @@ interface CurrentScoreProps {
 
 export function CurrentScore({ score, scoreAnimation }: CurrentScoreProps) {
   return (
-    <div className="flex flex-col items-center py-2">
+    <div className="flex flex-col items-center py-1">
       {/* Diamond icon */}
       <div
         className="w-5 h-5 rotate-45 mb-1"

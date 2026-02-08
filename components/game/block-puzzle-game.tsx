@@ -65,14 +65,18 @@ export function BlockPuzzleGame() {
     setHighScore(getHighScore());
   }, []);
 
-  // Calculate cell size based on container width
+  // Calculate cell size based on container width -- use almost full width on mobile
   useEffect(() => {
     function handleResize() {
       if (containerRef.current) {
         const width = containerRef.current.clientWidth;
-        const maxBoardWidth = Math.min(width - 32, 400);
-        const size = Math.floor((maxBoardWidth - (GRID_SIZE + 1) * 2) / GRID_SIZE);
-        setCellSize(Math.max(size, 28));
+        // On mobile, use width - 16px (8px each side for LED dots).
+        // On larger screens, cap at 480px.
+        const maxBoardWidth = Math.min(width - 16, 480);
+        // Subtract the LED dot padding (16px) and grid gaps
+        const innerBoardWidth = maxBoardWidth - 16;
+        const size = Math.floor((innerBoardWidth - (GRID_SIZE + 1) * 2) / GRID_SIZE);
+        setCellSize(Math.max(size, 32));
       }
     }
     handleResize();
@@ -267,7 +271,7 @@ export function BlockPuzzleGame() {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col items-center min-h-screen max-w-md mx-auto select-none"
+      className="flex flex-col items-center min-h-screen max-w-lg mx-auto select-none px-1"
       style={{ touchAction: "none" }}
     >
       {/* Score Header */}
