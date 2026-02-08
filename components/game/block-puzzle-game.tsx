@@ -65,19 +65,18 @@ export function BlockPuzzleGame() {
     setHighScore(getHighScore());
   }, []);
 
-  // Calculate cell size based on container width -- use almost full width on mobile
+  // Calculate cell size -- use almost full screen width on mobile
   useEffect(() => {
     function handleResize() {
-      if (containerRef.current) {
-        const width = containerRef.current.clientWidth;
-        // On mobile, use width - 16px (8px each side for LED dots).
-        // On larger screens, cap at 480px.
-        const maxBoardWidth = Math.min(width - 16, 480);
-        // Subtract the LED dot padding (16px) and grid gaps
-        const innerBoardWidth = maxBoardWidth - 16;
-        const size = Math.floor((innerBoardWidth - (GRID_SIZE + 1) * 2) / GRID_SIZE);
-        setCellSize(Math.max(size, 32));
-      }
+      // Use window width directly, not container (which may be constrained)
+      const screenWidth = window.innerWidth;
+      // Board takes almost all width: only 8px padding each side
+      // LED wrapper adds 16px, board border adds 4px
+      const availableForBoard = Math.min(screenWidth - 16, 500) - 20;
+      // Each cell = cellSize, gaps between cells = 2px, total gaps = (GRID_SIZE+1)*2
+      const totalGaps = (GRID_SIZE + 1) * 2;
+      const size = Math.floor((availableForBoard - totalGaps) / GRID_SIZE);
+      setCellSize(Math.max(size, 32));
     }
     handleResize();
     window.addEventListener("resize", handleResize);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Crown } from "lucide-react";
 
 interface NewHighScoreBannerProps {
@@ -10,21 +10,35 @@ interface NewHighScoreBannerProps {
 export function NewHighScoreBanner({ show }: NewHighScoreBannerProps) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const prevShow = useRef(false);
 
   useEffect(() => {
-    if (show && !visible) {
+    // Only trigger on rising edge: show goes from false to true
+    if (show && !prevShow.current) {
       setVisible(true);
       setExiting(false);
 
-      // Auto-hide after 2.5 seconds
-      const timer = setTimeout(() => {
+      // Start exit after 1 second
+      const exitTimer = setTimeout(() => {
         setExiting(true);
-        setTimeout(() => setVisible(false), 500);
-      }, 2500);
+      }, 1000);
 
-      return () => clearTimeout(timer);
+      // Fully hide after exit animation (0.4s)
+      const hideTimer = setTimeout(() => {
+        setVisible(false);
+      }, 1400);
+
+      prevShow.current = true;
+      return () => {
+        clearTimeout(exitTimer);
+        clearTimeout(hideTimer);
+      };
     }
-  }, [show, visible]);
+
+    if (!show) {
+      prevShow.current = false;
+    }
+  }, [show]);
 
   if (!visible) return null;
 
