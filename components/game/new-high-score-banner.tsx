@@ -11,34 +11,23 @@ interface NewHighScoreBannerProps {
 export function NewHighScoreBanner({ show, onHidden }: NewHighScoreBannerProps) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const prevShow = useRef(false);
 
   useEffect(() => {
-    // Only trigger on rising edge: show goes from false to true
-    if (show && !prevShow.current) {
+    if (show) {
       setVisible(true);
       setExiting(false);
 
-      // Start exit after 1 second
-      const exitTimer = setTimeout(() => {
+      // Auto-hide after 1 second
+      const timer = setTimeout(() => {
         setExiting(true);
+        // Start exit animation, then hide
+        setTimeout(() => {
+          setVisible(false);
+          onHidden?.();
+        }, 400);
       }, 1000);
 
-      // Fully hide after exit animation (0.4s)
-      const hideTimer = setTimeout(() => {
-        setVisible(false);
-        onHidden?.();
-      }, 1400);
-
-      prevShow.current = true;
-      return () => {
-        clearTimeout(exitTimer);
-        clearTimeout(hideTimer);
-      };
-    }
-
-    if (!show) {
-      prevShow.current = false;
+      return () => clearTimeout(timer);
     }
   }, [show, onHidden]);
 

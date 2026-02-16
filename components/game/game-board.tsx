@@ -14,30 +14,7 @@ interface GameBoardProps {
   onCellPointerUp: (row: number, col: number) => void;
 }
 
-// LED dot positions around the board border
-function useLedDots(boardSize: number, count: number) {
-  return useMemo(() => {
-    const dots: { x: number; y: number; delay: number }[] = [];
-    const perimeter = boardSize * 4;
-    const spacing = perimeter / count;
-    for (let i = 0; i < count; i++) {
-      const d = i * spacing;
-      let x = 0;
-      let y = 0;
-      if (d < boardSize) {
-        x = d; y = 0; // top
-      } else if (d < boardSize * 2) {
-        x = boardSize; y = d - boardSize; // right
-      } else if (d < boardSize * 3) {
-        x = boardSize - (d - boardSize * 2); y = boardSize; // bottom
-      } else {
-        x = 0; y = boardSize - (d - boardSize * 3); // left
-      }
-      dots.push({ x, y, delay: i * 0.06 });
-    }
-    return dots;
-  }, [boardSize, count]);
-}
+
 
 export function GameBoard({
   grid,
@@ -50,7 +27,6 @@ export function GameBoard({
 }: GameBoardProps) {
   const boardSize = GRID_SIZE * cellSize + (GRID_SIZE + 1) * 2;
   const isClearing = clearingRows.length > 0 || clearingCols.length > 0;
-  const ledDots = useLedDots(boardSize, 40);
 
   // Calculate ghost preview cells -- only show when placement is valid
   const ghostCells = new Map<string, string>();
@@ -75,26 +51,6 @@ export function GameBoard({
         padding: 8,
       }}
     >
-      {/* LED dots around border */}
-      {ledDots.map((dot, i) => {
-        const baseStyle: React.CSSProperties = {
-          left: dot.x + 8 - 2.5,
-          top: dot.y + 8 - 2.5,
-        };
-        
-        if (isClearing) {
-          baseStyle["--dot-delay" as any] = `${dot.delay}s`;
-        }
-        
-        return (
-          <div
-            key={i}
-            className={`led-dot ${isClearing ? "led-dot--active" : "led-dot--inactive"}`}
-            style={baseStyle}
-          />
-        );
-      })}
-
       {/* Board inner */}
       <div
         className="relative rounded-lg overflow-hidden"
