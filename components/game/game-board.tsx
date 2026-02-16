@@ -79,23 +79,11 @@ export function GameBoard({
       {ledDots.map((dot, i) => (
         <div
           key={i}
-          className="absolute rounded-full pointer-events-none"
+          className={`led-dot ${isClearing ? "led-dot--active" : "led-dot--inactive"}`}
           style={{
-            width: 5,
-            height: 5,
             left: dot.x + 8 - 2.5,
             top: dot.y + 8 - 2.5,
-            backgroundColor: isClearing ? "#22c55e" : "#22c55e",
-            opacity: isClearing ? 1 : 0.35,
-            boxShadow: isClearing
-              ? `0 0 6px #22c55e, 0 0 12px #22c55e80`
-              : `0 0 3px #22c55e60`,
-            animationName: isClearing ? "ledDot" : "none",
-            animationDuration: "0.4s",
-            animationTimingFunction: "ease-in-out",
-            animationIterationCount: "infinite",
-            animationDelay: `${dot.delay}s`,
-            transition: "opacity 0.3s, box-shadow 0.3s",
+            animationDelay: isClearing ? `${dot.delay}s` : "0s",
           }}
         />
       ))}

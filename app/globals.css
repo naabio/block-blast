@@ -101,3 +101,29 @@
   0%, 100% { opacity: 0.3; box-shadow: 0 0 2px currentColor; }
   50% { opacity: 1; box-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
 }
+
+/* LED dot classes to avoid inline style conflicts */
+.led-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background-color: #22c55e;
+  transition: opacity 0.3s, box-shadow 0.3s;
+}
+
+.led-dot--inactive {
+  opacity: 0.35;
+  box-shadow: 0 0 3px #22c55e60;
+  animation-name: none;
+}
+
+.led-dot--active {
+  opacity: 1;
+  box-shadow: 0 0 6px #22c55e, 0 0 12px #22c55e80;
+  animation-name: ledDot;
+  animation-duration: 0.4s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
