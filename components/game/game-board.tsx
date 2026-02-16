@@ -83,8 +83,8 @@ export function GameBoard({
           style={{
             left: dot.x + 8 - 2.5,
             top: dot.y + 8 - 2.5,
-            animationDelay: isClearing ? `${dot.delay}s` : "0s",
-          }}
+            "--dot-delay": isClearing ? `${dot.delay}s` : "0s",
+          } as React.CSSProperties}
         />
       ))}
 
