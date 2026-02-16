@@ -90,7 +90,10 @@ export function GameBoard({
             boxShadow: isClearing
               ? `0 0 6px #22c55e, 0 0 12px #22c55e80`
               : `0 0 3px #22c55e60`,
-            animation: isClearing ? `ledDot 0.4s ease-in-out infinite` : "none",
+            animationName: isClearing ? "ledDot" : "none",
+            animationDuration: "0.4s",
+            animationTimingFunction: "ease-in-out",
+            animationIterationCount: "infinite",
             animationDelay: `${dot.delay}s`,
             transition: "opacity 0.3s, box-shadow 0.3s",
           }}
