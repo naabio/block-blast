@@ -270,7 +270,7 @@ export function BlockPuzzleGame() {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col items-center min-h-screen max-w-lg mx-auto select-none px-1"
+      className="flex flex-col items-center justify-center min-h-screen w-full select-none"
       style={{ touchAction: "none" }}
     >
       {/* Score Header */}
@@ -280,7 +280,10 @@ export function BlockPuzzleGame() {
       <CurrentScore score={score} scoreAnimation={scoreAnimation} />
 
       {/* New High Score Banner */}
-      <NewHighScoreBanner show={showHighScoreBanner} />
+      <NewHighScoreBanner 
+        show={showHighScoreBanner} 
+        onHidden={() => setShowHighScoreBanner(false)}
+      />
 
       {/* Game Board */}
       <div ref={boardRef} className="relative">

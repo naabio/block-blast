@@ -5,9 +5,10 @@ import { Crown } from "lucide-react";
 
 interface NewHighScoreBannerProps {
   show: boolean;
+  onHidden?: () => void;
 }
 
-export function NewHighScoreBanner({ show }: NewHighScoreBannerProps) {
+export function NewHighScoreBanner({ show, onHidden }: NewHighScoreBannerProps) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
   const prevShow = useRef(false);
@@ -26,6 +27,7 @@ export function NewHighScoreBanner({ show }: NewHighScoreBannerProps) {
       // Fully hide after exit animation (0.4s)
       const hideTimer = setTimeout(() => {
         setVisible(false);
+        onHidden?.();
       }, 1400);
 
       prevShow.current = true;
@@ -38,7 +40,7 @@ export function NewHighScoreBanner({ show }: NewHighScoreBannerProps) {
     if (!show) {
       prevShow.current = false;
     }
-  }, [show]);
+  }, [show, onHidden]);
 
   if (!visible) return null;
 
