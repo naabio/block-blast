@@ -76,17 +76,24 @@ export function GameBoard({
       }}
     >
       {/* LED dots around border */}
-      {ledDots.map((dot, i) => (
-        <div
-          key={i}
-          className={`led-dot ${isClearing ? "led-dot--active" : "led-dot--inactive"}`}
-          style={{
-            left: dot.x + 8 - 2.5,
-            top: dot.y + 8 - 2.5,
-            "--dot-delay": isClearing ? `${dot.delay}s` : "0s",
-          } as React.CSSProperties}
-        />
-      ))}
+      {ledDots.map((dot, i) => {
+        const baseStyle: React.CSSProperties = {
+          left: dot.x + 8 - 2.5,
+          top: dot.y + 8 - 2.5,
+        };
+        
+        if (isClearing) {
+          baseStyle["--dot-delay" as any] = `${dot.delay}s`;
+        }
+        
+        return (
+          <div
+            key={i}
+            className={`led-dot ${isClearing ? "led-dot--active" : "led-dot--inactive"}`}
+            style={baseStyle}
+          />
+        );
+      })}
 
       {/* Board inner */}
       <div
