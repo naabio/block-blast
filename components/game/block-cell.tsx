@@ -1,6 +1,7 @@
 "use client";
 
 import { BLOCK_COLORS, type BlockColorName } from "@/lib/game-logic";
+import { BlockIcon } from "./block-icon";
 
 interface BlockCellProps {
   color: BlockColorName | null;
@@ -85,54 +86,17 @@ export function BlockCell({
         }}
       />
       
-      {/* Decorative diamond pattern at center */}
+      {/* Bold icon in center */}
       {!ghost && !isPreview && (
         <div
-          className="absolute pointer-events-none"
-          style={{
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: size * 0.3,
-            height: size * 0.3,
-            background: `linear-gradient(135deg, ${c.light}70, ${c.glow}50)`,
-            clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
-            opacity: 0.5,
-            filter: `drop-shadow(0 0 3px ${c.glow})`,
-          }}
-        />
-      )}
-      
-      {/* Corner accent dots */}
-      {!ghost && !isPreview && (
-        <>
-          {/* Top-right accent */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              right: size * 0.12,
-              top: size * 0.12,
-              width: size * 0.18,
-              height: size * 0.18,
-              background: `radial-gradient(circle at 30% 30%, ${c.glow}, ${c.light}60, transparent)`,
-              opacity: 0.6,
-              filter: `drop-shadow(0 0 2px ${c.glow})`,
-            }}
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        >
+          <BlockIcon
+            type={color === "red" || color === "purple" ? "star" : "pentagon"}
+            color={c.light}
+            size={size}
           />
-          {/* Bottom-left accent */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              left: size * 0.12,
-              bottom: size * 0.12,
-              width: size * 0.14,
-              height: size * 0.14,
-              background: `radial-gradient(circle, ${c.glow}, transparent)`,
-              opacity: 0.4,
-              filter: `drop-shadow(0 0 1px ${c.glow})`,
-            }}
-          />
-        </>
+        </div>
       )}
       
       {/* Clearing glow overlay */}
