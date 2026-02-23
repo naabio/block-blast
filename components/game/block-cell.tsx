@@ -84,6 +84,59 @@ export function BlockCell({
           background: `radial-gradient(ellipse, ${c.glow}40, transparent)`,
         }}
       />
+      
+      {/* Decorative diamond pattern at center */}
+      {!ghost && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          {/* Diamond shape */}
+          <div
+            style={{
+              width: size * 0.35,
+              height: size * 0.35,
+              background: `linear-gradient(135deg, ${c.light}60, ${c.glow}40)`,
+              transform: "rotate(45deg)",
+              borderRadius: "2px",
+              opacity: 0.4,
+              boxShadow: `inset 0 0 4px ${c.light}80, 0 0 6px ${c.glow}40`,
+            }}
+          />
+        </div>
+      )}
+      
+      {/* Corner star accents */}
+      {!ghost && (
+        <>
+          {/* Top-right corner star */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              right: size * 0.1,
+              top: size * 0.1,
+              width: size * 0.15,
+              height: size * 0.15,
+              background: `radial-gradient(circle, ${c.glow}80, ${c.light}40, transparent)`,
+              borderRadius: "50%",
+              opacity: 0.5,
+              boxShadow: `0 0 3px ${c.glow}`,
+            }}
+          />
+          {/* Bottom-left corner star */}
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              left: size * 0.08,
+              bottom: size * 0.12,
+              width: size * 0.12,
+              height: size * 0.12,
+              background: `radial-gradient(circle, ${c.glow}60, transparent)`,
+              borderRadius: "50%",
+              opacity: 0.4,
+              boxShadow: `0 0 2px ${c.glow}`,
+            }}
+          />
+        </>
+      )}
+      
       {/* Clearing glow overlay */}
       {isClearing && (
         <div
