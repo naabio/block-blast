@@ -35,6 +35,7 @@ export function BlockCell({
         width: size,
         height: size,
         animation: isClearing ? "cellPop 0.5s ease-out forwards" : "none",
+        boxShadow: ghost ? "none" : "inset -2px -2px 4px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.5)",
       }}
       className="rounded-[3px] relative overflow-hidden"
     >
@@ -93,7 +94,11 @@ export function BlockCell({
         >
           <BlockIcon
             type={color === "red" || color === "purple" ? "star" : "pentagon"}
-            color={c.light}
+            color={
+              color === "cyan" || color === "blue" || color === "purple" 
+                ? "#FF9933"  // Orange for bright/dark colors
+                : "#DC2626"  // Red for light/tan colors
+            }
             size={size}
           />
         </div>
