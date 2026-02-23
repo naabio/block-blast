@@ -9,29 +9,18 @@ interface NewHighScoreBannerProps {
 }
 
 export function NewHighScoreBanner({ show, onHidden }: NewHighScoreBannerProps) {
-  const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
     if (show) {
-      setVisible(true);
       setExiting(false);
-
-      // Auto-hide after 1 second
-      const timer = setTimeout(() => {
-        setExiting(true);
-        // Start exit animation, then hide
-        setTimeout(() => {
-          setVisible(false);
-          onHidden?.();
-        }, 400);
-      }, 1000);
-
-      return () => clearTimeout(timer);
+    } else if (show === false && exiting) {
+      // When show becomes false, we're done exiting
+      setExiting(false);
     }
-  }, [show, onHidden]);
+  }, [show]);
 
-  if (!visible) return null;
+  if (!show && !exiting) return null;
 
   return (
     <div className="absolute inset-x-0 top-1/3 z-30 flex justify-center pointer-events-none">
