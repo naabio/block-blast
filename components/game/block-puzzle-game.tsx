@@ -132,10 +132,10 @@ export function BlockPuzzleGame() {
         if (!isNewHighScore) {
           setIsNewHighScore(true);
           setShowHighScoreBanner(true);
-          // Auto-hide banner after 1.4 seconds
+          // Auto-hide banner after 0.8 seconds (0.5s display + 0.3s exit animation)
           setTimeout(() => {
             setShowHighScoreBanner(false);
-          }, 1400);
+          }, 800);
         }
       }
 

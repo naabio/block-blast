@@ -31,8 +31,8 @@ export function NewHighScoreBanner({ show, onHidden }: NewHighScoreBannerProps) 
           boxShadow: "0 0 40px rgba(250,200,50,0.5), 0 0 80px rgba(250,200,50,0.2), inset 0 1px 0 rgba(255,255,255,0.3)",
           border: "2px solid rgba(255,220,80,0.6)",
           animation: exiting
-            ? "highScoreBounce 0.4s ease-in reverse forwards"
-            : "highScoreBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+            ? "highScoreBounce 0.3s ease-in reverse forwards"
+            : "highScoreBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         }}
       >
         {/* Crown */}
