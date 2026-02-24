@@ -125,7 +125,7 @@ export function BlockCell({
       />
       
       {/* Bold icon in center - varies by color for visual variety */}
-      {!ghost && !isPreview && (
+      {!ghost && (
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
         >
