@@ -99,11 +99,15 @@ export function GameBoard({
 
         {/* Grid */}
         <div
-          className="grid relative z-0"
+          className="grid absolute"
           style={{
             gridTemplateColumns: `repeat(${GRID_SIZE}, ${cellSize}px)`,
             gap: "2px",
             padding: "2px",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 0,
           }}
         >
           {grid.map((row, r) =>
