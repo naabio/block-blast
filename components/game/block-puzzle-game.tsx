@@ -38,6 +38,11 @@ function saveHighScore(score: number) {
   localStorage.setItem(LS_HIGH_SCORE_KEY, String(score));
 }
 
+// Smooth interpolation helper
+function lerp(current: number, target: number, alpha: number): number {
+  return current + (target - current) * alpha;
+}
+
 export function BlockPuzzleGame() {
   const [gameState, setGameState] = useState<GameState>("start");
   const [grid, setGrid] = useState<Grid>(createEmptyGrid);
@@ -55,6 +60,9 @@ export function BlockPuzzleGame() {
   const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
   const [dragGridPos, setDragGridPos] = useState<{ row: number; col: number } | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [validPositions, setValidPositions] = useState<Set<string>>(new Set());
+  const [snappedGridPos, setSnappedGridPos] = useState<{ row: number; col: number } | null>(null);
+  const [visualDragPos, setVisualDragPos] = useState<{ x: number; y: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -177,42 +185,57 @@ export function BlockPuzzleGame() {
     [cellSize]
   );
 
+  // --- Pre-calculate valid placements for a piece ---
+  const calculateValidPositions = useCallback(
+    (piece: PieceShape): Set<string> => {
+      const valid = new Set<string>();
+      for (let row = 0; row < GRID_SIZE; row++) {
+        for (let col = 0; col < GRID_SIZE; col++) {
+          if (canPlacePiece(grid, piece, row, col)) {
+            valid.add(`${row}-${col}`);
+          }
+        }
+      }
+      return valid;
+    },
+    [grid]
+  );
+
   // --- Drag start (from piece tray) ---
   const handleDragStart = useCallback(
     (index: number, clientX: number, clientY: number, offsetX: number, offsetY: number) => {
       if (pieces[index] === null) return;
+      const piece = pieces[index]!;
+      
       setDraggingPieceIndex(index);
       setDragPos({ x: clientX, y: clientY });
+      setVisualDragPos({ x: clientX, y: clientY });
       setDragOffset({ x: offsetX, y: offsetY });
       setDragGridPos(null);
+      setSnappedGridPos(null);
+      
+      // Pre-calculate valid positions
+      const valid = calculateValidPositions(piece);
+      setValidPositions(valid);
     },
-    [pieces]
+    [pieces, calculateValidPositions]
   );
 
-  // --- Helper: convert pointer coords to grid row/col ---
-  // The floating piece is shown 60px above the finger, so we map the
-  // *center of that floating piece* onto the board to decide the grid cell.
+  // --- Convert pointer to grid position ---
   const calcGridFromPointer = useCallback(
     (clientX: number, clientY: number, piece: PieceShape | null) => {
       if (!boardRef.current || !piece) return null;
       const rect = boardRef.current.getBoundingClientRect();
-      const cellStep = cellSize + 2; // cell + gap
-
-      // The floating piece is drawn with its center at (clientX, clientY - 60 - h/2).
-      // We want the *top-left cell* of the piece to map onto the grid.
+      const cellStep = cellSize + 2;
       const bounds = getPieceBounds(piece);
       const pieceW = bounds.cols * cellStep;
       const pieceH = bounds.rows * cellStep;
 
-      // Where the floating piece's top-left corner would be:
       const floatTopLeftX = clientX - pieceW / 2;
       const floatTopLeftY = clientY - 60 - pieceH;
-
-      // Center of the floating piece's top-left cell:
       const cellCenterX = floatTopLeftX + cellStep / 2;
       const cellCenterY = floatTopLeftY + cellStep / 2;
 
-      // Convert to grid coordinates
       const col = Math.round((cellCenterX - rect.left - 2 - cellSize / 2) / cellStep);
       const row = Math.round((cellCenterY - rect.top - 2 - cellSize / 2) / cellStep);
 
@@ -224,30 +247,76 @@ export function BlockPuzzleGame() {
     [cellSize]
   );
 
-  // --- Global pointer move / up for drag ---
+  // --- Magnetic snapping to nearest valid position ---
+  const getSnappedPosition = useCallback(
+    (pointerGrid: { row: number; col: number } | null): { row: number; col: number } | null => {
+      if (!pointerGrid || validPositions.size === 0) return null;
+
+      const SNAP_RADIUS = 2;
+      let nearest: { row: number; col: number } | null = null;
+      let minDist = Infinity;
+
+      for (const key of validPositions) {
+        const [row, col] = key.split("-").map(Number);
+        const dist = Math.hypot(row - pointerGrid.row, col - pointerGrid.col);
+        if (dist <= SNAP_RADIUS && dist < minDist) {
+          minDist = dist;
+          nearest = { row, col };
+        }
+      }
+      return nearest;
+    },
+    [validPositions]
+  );
+
+  // --- Global pointer move / up for drag with snapping ---
   useEffect(() => {
     if (draggingPieceIndex === null) return;
     const piece = pieces[draggingPieceIndex];
+    let lastVisualPos = dragPos;
 
     function handlePointerMove(e: PointerEvent) {
       e.preventDefault();
-      setDragPos({ x: e.clientX, y: e.clientY });
+      const newPos = { x: e.clientX, y: e.clientY };
+      setDragPos(newPos);
 
-      const gp = calcGridFromPointer(e.clientX, e.clientY, piece);
-      setDragGridPos(gp);
+      // Calculate raw grid position
+      const rawGrid = calcGridFromPointer(e.clientX, e.clientY, piece);
+      
+      // Apply magnetic snapping to nearest valid position
+      const snapped = getSnappedPosition(rawGrid);
+      setSnappedGridPos(snapped);
+      
+      // Use snapped position for grid display, raw for dragging
+      setDragGridPos(snapped || rawGrid);
+
+      // Smooth interpolation for visual position
+      if (lastVisualPos) {
+        const interpX = lerp(lastVisualPos.x, newPos.x, 0.2);
+        const interpY = lerp(lastVisualPos.y, newPos.y, 0.2);
+        setVisualDragPos({ x: interpX, y: interpY });
+        lastVisualPos = { x: interpX, y: interpY };
+      } else {
+        setVisualDragPos(newPos);
+        lastVisualPos = newPos;
+      }
     }
 
     function handlePointerUp(e: PointerEvent) {
       if (draggingPieceIndex === null) return;
 
-      const gp = calcGridFromPointer(e.clientX, e.clientY, piece);
-      if (gp && piece) {
-        doPlacePiece(draggingPieceIndex, gp.row, gp.col);
+      // Use snapped position if available, otherwise raw grid position
+      const finalGrid = snappedGridPos || calcGridFromPointer(e.clientX, e.clientY, piece);
+      if (finalGrid && piece) {
+        doPlacePiece(draggingPieceIndex, finalGrid.row, finalGrid.col);
       }
 
       setDraggingPieceIndex(null);
       setDragPos(null);
+      setVisualDragPos(null);
       setDragGridPos(null);
+      setSnappedGridPos(null);
+      setValidPositions(new Set());
     }
 
     window.addEventListener("pointermove", handlePointerMove, { passive: false });
@@ -259,7 +328,7 @@ export function BlockPuzzleGame() {
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
     };
-  }, [draggingPieceIndex, pieces, cellSize, doPlacePiece, calcGridFromPointer]);
+  }, [draggingPieceIndex, pieces, cellSize, doPlacePiece, calcGridFromPointer, getSnappedPosition, snappedGridPos]);
 
   // --- Get dragged piece for ghost preview on board ---
   const draggedPiece = draggingPieceIndex !== null ? pieces[draggingPieceIndex] : null;
@@ -310,11 +379,11 @@ export function BlockPuzzleGame() {
         cellSize={cellSize}
       />
 
-      {/* Floating dragged piece */}
-      {draggingPieceIndex !== null && dragPos && draggedPiece && (
+      {/* Floating dragged piece with smooth position */}
+      {draggingPieceIndex !== null && visualDragPos && draggedPiece && (
         <DragFloatingPiece
           piece={draggedPiece}
-          pos={dragPos}
+          pos={visualDragPos}
           cellSize={previewCellSize}
         />
       )}
