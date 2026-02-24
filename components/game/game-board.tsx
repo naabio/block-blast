@@ -44,11 +44,10 @@ export function GameBoard({
 
   return (
     <div
-      className="relative rounded-lg"
+      className="relative rounded-lg flex items-center justify-center"
       style={{
         width: boardSize + 16,
         height: boardSize + 16,
-        padding: 8,
       }}
     >
       {/* Board inner */}
