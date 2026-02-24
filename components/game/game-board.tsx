@@ -53,7 +53,7 @@ export function GameBoard({
     >
       {/* Board inner */}
       <div
-        className="relative rounded-lg overflow-hidden"
+        className="relative rounded-lg"
         style={{
           width: boardSize,
           height: boardSize,
@@ -63,6 +63,7 @@ export function GameBoard({
             : "inset 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.15)",
           border: `2px solid ${isClearing ? "rgba(34,197,94,0.5)" : "hsl(225, 35%, 25%)"}`,
           transition: "box-shadow 0.3s, border-color 0.3s",
+          overflow: "visible",
         }}
       >
         {/* Line clear glow bars -- horizontal */}
