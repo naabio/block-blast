@@ -44,16 +44,15 @@ export function GameBoard({
 
   return (
     <div
-      className="relative rounded-lg"
+      className="relative rounded-lg flex items-center justify-center"
       style={{
         width: boardSize + 16,
         height: boardSize + 16,
-        padding: 8,
       }}
     >
       {/* Board inner */}
       <div
-        className="relative rounded-lg overflow-hidden"
+        className="relative rounded-lg"
         style={{
           width: boardSize,
           height: boardSize,
@@ -63,6 +62,7 @@ export function GameBoard({
             : "inset 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(59,130,246,0.15)",
           border: `2px solid ${isClearing ? "rgba(34,197,94,0.5)" : "hsl(225, 35%, 25%)"}`,
           transition: "box-shadow 0.3s, border-color 0.3s",
+          overflow: "visible",
         }}
       >
         {/* Line clear glow bars -- horizontal */}
@@ -99,11 +99,15 @@ export function GameBoard({
 
         {/* Grid */}
         <div
-          className="grid relative z-0"
+          className="grid absolute"
           style={{
             gridTemplateColumns: `repeat(${GRID_SIZE}, ${cellSize}px)`,
             gap: "2px",
             padding: "2px",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 0,
           }}
         >
           {grid.map((row, r) =>

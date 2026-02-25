@@ -1,6 +1,7 @@
 "use client";
 
 import { BLOCK_COLORS, type BlockColorName } from "@/lib/game-logic";
+import { BlockIcon } from "./block-icon";
 
 interface BlockCellProps {
   color: BlockColorName | null;
@@ -8,6 +9,43 @@ interface BlockCellProps {
   isPreview?: boolean;
   isClearing?: boolean;
   ghost?: boolean;
+}
+
+// Get icon type based on block color - varies for visual diversity
+function getIconType(color: BlockColorName): "star" | "pentagon" | "diamond" {
+  switch (color) {
+    case "red":
+    case "blue":
+      return "star";
+    case "cyan":
+    case "gold":
+      return "pentagon";
+    case "purple":
+    case "green":
+      return "diamond";
+    default:
+      return "star";
+  }
+}
+
+// Get icon color with high contrast based on block color
+function getIconColor(color: BlockColorName): string {
+  switch (color) {
+    case "red":
+      return "#FFF000"; // Yellow on red for high contrast
+    case "cyan":
+      return "#FF6B35"; // Red-orange on cyan
+    case "blue":
+      return "#FFD60A"; // Yellow on blue
+    case "gold":
+      return "#DC2626"; // Red on gold
+    case "purple":
+      return "#FFF000"; // Yellow on purple
+    case "green":
+      return "#FF6B35"; // Red-orange on green
+    default:
+      return "#FFF";
+  }
 }
 
 export function BlockCell({
@@ -34,6 +72,7 @@ export function BlockCell({
         width: size,
         height: size,
         animation: isClearing ? "cellPop 0.5s ease-out forwards" : "none",
+        boxShadow: ghost ? "none" : "inset -2px -2px 4px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.5)",
       }}
       className="rounded-[3px] relative overflow-hidden"
     >
@@ -84,6 +123,20 @@ export function BlockCell({
           background: `radial-gradient(ellipse, ${c.glow}40, transparent)`,
         }}
       />
+      
+      {/* Bold icon in center - varies by color for visual variety */}
+      {!ghost && (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        >
+          <BlockIcon
+            type={getIconType(color)}
+            color={getIconColor(color)}
+            size={size}
+          />
+        </div>
+      )}
+      
       {/* Clearing glow overlay */}
       {isClearing && (
         <div

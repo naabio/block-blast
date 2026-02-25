@@ -9,29 +9,18 @@ interface NewHighScoreBannerProps {
 }
 
 export function NewHighScoreBanner({ show, onHidden }: NewHighScoreBannerProps) {
-  const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
     if (show) {
-      setVisible(true);
       setExiting(false);
-
-      // Auto-hide after 1 second
-      const timer = setTimeout(() => {
-        setExiting(true);
-        // Start exit animation, then hide
-        setTimeout(() => {
-          setVisible(false);
-          onHidden?.();
-        }, 400);
-      }, 1000);
-
-      return () => clearTimeout(timer);
+    } else if (show === false && exiting) {
+      // When show becomes false, we're done exiting
+      setExiting(false);
     }
-  }, [show, onHidden]);
+  }, [show]);
 
-  if (!visible) return null;
+  if (!show && !exiting) return null;
 
   return (
     <div className="absolute inset-x-0 top-1/3 z-30 flex justify-center pointer-events-none">
@@ -42,8 +31,8 @@ export function NewHighScoreBanner({ show, onHidden }: NewHighScoreBannerProps) 
           boxShadow: "0 0 40px rgba(250,200,50,0.5), 0 0 80px rgba(250,200,50,0.2), inset 0 1px 0 rgba(255,255,255,0.3)",
           border: "2px solid rgba(255,220,80,0.6)",
           animation: exiting
-            ? "highScoreBounce 0.4s ease-in reverse forwards"
-            : "highScoreBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+            ? "highScoreBounce 0.3s ease-in reverse forwards"
+            : "highScoreBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
         }}
       >
         {/* Crown */}
