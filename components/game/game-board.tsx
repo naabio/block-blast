@@ -12,6 +12,8 @@ interface GameBoardProps {
   dragPiece: PieceShape | null;
   dragGridPos: { row: number; col: number } | null;
   onCellPointerUp: (row: number, col: number) => void;
+  blockDropAnimating?: boolean;
+  invalidPlacementAnimating?: boolean;
 }
 
 
@@ -24,6 +26,8 @@ export function GameBoard({
   dragPiece,
   dragGridPos,
   onCellPointerUp,
+  blockDropAnimating,
+  invalidPlacementAnimating,
 }: GameBoardProps) {
   const boardSize = GRID_SIZE * cellSize + (GRID_SIZE + 1) * 2;
   const isClearing = clearingRows.length > 0 || clearingCols.length > 0;
@@ -44,7 +48,9 @@ export function GameBoard({
 
   return (
     <div
-      className="relative rounded-lg flex items-center justify-center"
+      className={`relative rounded-lg flex items-center justify-center ${
+        invalidPlacementAnimating ? "animate-invalid-placement" : ""
+      }`}
       style={{
         width: boardSize + 16,
         height: boardSize + 16,
@@ -52,7 +58,7 @@ export function GameBoard({
     >
       {/* Board inner */}
       <div
-        className="relative rounded-lg"
+        className={`relative rounded-lg ${blockDropAnimating ? "animate-block-drop" : ""}`}
         style={{
           width: boardSize,
           height: boardSize,

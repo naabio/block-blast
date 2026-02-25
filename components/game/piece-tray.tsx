@@ -10,6 +10,7 @@ interface PieceTrayProps {
   selectedPieceIndex: number | null;
   onDragStart: (index: number, clientX: number, clientY: number, offsetX: number, offsetY: number) => void;
   cellSize: number;
+  blockPickAnimating?: boolean;
 }
 
 export function PieceTray({
@@ -17,6 +18,7 @@ export function PieceTray({
   selectedPieceIndex,
   onDragStart,
   cellSize,
+  blockPickAnimating,
 }: PieceTrayProps) {
   const previewCellSize = Math.floor(cellSize * 0.65);
 
@@ -56,12 +58,14 @@ export function PieceTray({
         return (
           <div
             key={i}
-            className="flex items-center justify-center rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing"
+            className={`flex items-center justify-center rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing ${
+              isDragging && blockPickAnimating ? "animate-block-pick" : ""
+            }`}
             style={{
               width: previewCellSize * 5 + 16,
               height: previewCellSize * 5 + 16,
               opacity: isDragging ? 0.3 : 1,
-              transform: isDragging ? "scale(0.9)" : "scale(1)",
+              transform: isDragging && !blockPickAnimating ? "scale(0.9)" : "scale(1)",
               background: "transparent",
               border: "2px solid transparent",
             }}

@@ -50,11 +50,10 @@ export function CurrentScore({ score, scoreAnimation }: CurrentScoreProps) {
       />
       {/* Score number */}
       <span
-        className="text-white font-bold tabular-nums transition-transform duration-150"
+        className={`text-white font-bold tabular-nums ${scoreAnimation ? "animate-score-pop" : ""}`}
         style={{
           fontSize: "clamp(2rem, 8vw, 3.5rem)",
           textShadow: "0 2px 8px rgba(0,0,0,0.3)",
-          transform: scoreAnimation ? "scale(1.15)" : "scale(1)",
         }}
       >
         {score}

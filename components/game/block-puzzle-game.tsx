@@ -64,6 +64,13 @@ export function BlockPuzzleGame() {
   const [snappedGridPos, setSnappedGridPos] = useState<{ row: number; col: number } | null>(null);
   const [visualDragPos, setVisualDragPos] = useState<{ x: number; y: number } | null>(null);
 
+  // Animation states
+  const [blockPickAnimating, setBlockPickAnimating] = useState(false);
+  const [blockDropAnimating, setBlockDropAnimating] = useState(false);
+  const [invalidPlacementAnimating, setInvalidPlacementAnimating] = useState(false);
+  const [floatingScores, setFloatingScores] = useState<Array<{ id: number; x: number; y: number; text: string }>>([]);
+  const floatingScoreIdRef = useRef(0);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const [cellSize, setCellSize] = useState(38);
@@ -110,7 +117,16 @@ export function BlockPuzzleGame() {
     (pieceIndex: number, row: number, col: number) => {
       const piece = pieces[pieceIndex];
       if (!piece) return;
-      if (!canPlacePiece(grid, piece, row, col)) return;
+      if (!canPlacePiece(grid, piece, row, col)) {
+        // Invalid placement animation
+        setInvalidPlacementAnimating(true);
+        setTimeout(() => setInvalidPlacementAnimating(false), 200);
+        return;
+      }
+
+      // Trigger block drop animation
+      setBlockDropAnimating(true);
+      setTimeout(() => setBlockDropAnimating(false), 150);
 
       const newGrid = placePiece(grid, piece, row, col);
       const result = checkAndClearLines(newGrid);
@@ -132,7 +148,20 @@ export function BlockPuzzleGame() {
       const newScore = score + addedScore;
       setScore(newScore);
       setScoreAnimation(true);
-      setTimeout(() => setScoreAnimation(false), 150);
+      
+      // Add floating score text
+      const scoreId = floatingScoreIdRef.current++;
+      setFloatingScores(prev => [...prev, {
+        id: scoreId,
+        x: 50,
+        y: 200,
+        text: `+${addedScore}`
+      }]);
+      setTimeout(() => {
+        setFloatingScores(prev => prev.filter(s => s.id !== scoreId));
+      }, 600);
+      
+      setTimeout(() => setScoreAnimation(false), 200);
 
       if (newScore > highScore) {
         setHighScore(newScore);
@@ -213,6 +242,10 @@ export function BlockPuzzleGame() {
       setDragOffset({ x: offsetX, y: offsetY });
       setDragGridPos(null);
       setSnappedGridPos(null);
+      
+      // Trigger block pick animation
+      setBlockPickAnimating(true);
+      setTimeout(() => setBlockPickAnimating(false), 120);
       
       // Pre-calculate valid positions
       const valid = calculateValidPositions(piece);
@@ -368,6 +401,8 @@ export function BlockPuzzleGame() {
           dragPiece={draggedPiece}
           dragGridPos={dragGridPos}
           onCellPointerUp={() => {}}
+          blockDropAnimating={blockDropAnimating}
+          invalidPlacementAnimating={invalidPlacementAnimating}
         />
       </div>
 
@@ -377,6 +412,7 @@ export function BlockPuzzleGame() {
         selectedPieceIndex={draggingPieceIndex}
         onDragStart={handleDragStart}
         cellSize={cellSize}
+        blockPickAnimating={blockPickAnimating}
       />
 
       {/* Floating dragged piece with smooth position */}

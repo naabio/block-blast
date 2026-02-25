@@ -125,3 +125,82 @@
   animation: ledDot 0.4s ease-in-out infinite;
   animation-delay: var(--dot-delay, 0s);
 }
+
+/* ===== BLOCK ANIMATIONS ===== */
+
+/* Block pick/drag start animation */
+@keyframes blockPickScale {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+/* Block successful drop/place animation */
+@keyframes blockDropBounce {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Invalid placement shake */
+@keyframes invalidPlacementShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* Score text pop animation */
+@keyframes scoreTextPop {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Floating score text rising and fading */
+@keyframes scoreFloatFade {
+  0% { transform: translateY(0) translateX(0); opacity: 1; }
+  100% { transform: translateY(-20px) translateX(10px); opacity: 0; }
+}
+
+/* Game over overlay fade */
+@keyframes gameOverOverlayFade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Game over modal slide up */
+@keyframes gameOverModalSlideUp {
+  0% { transform: translateY(100px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Animation utility classes */
+.animate-block-pick {
+  animation: blockPickScale 0.12s ease-out forwards;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.animate-block-drop {
+  animation: blockDropBounce 0.15s ease-out forwards;
+}
+
+.animate-invalid-placement {
+  animation: invalidPlacementShake 0.2s ease-out;
+}
+
+.animate-score-pop {
+  animation: scoreTextPop 0.2s ease-out;
+}
+
+.animate-score-float {
+  animation: scoreFloatFade 0.6s ease-out forwards;
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.animate-game-over-overlay {
+  animation: gameOverOverlayFade 0.2s ease-out forwards;
+}
+
+.animate-game-over-modal {
+  animation: gameOverModalSlideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

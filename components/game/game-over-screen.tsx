@@ -18,9 +18,9 @@ export function GameOverScreen({
   onHome,
 }: GameOverScreenProps) {
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="absolute inset-0 z-50 flex items-center justify-center animate-game-over-overlay" style={{ background: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(4px)" }}>
       <div
-        className="flex flex-col items-center gap-6 px-8 py-10 rounded-2xl mx-4 max-w-sm w-full"
+        className="flex flex-col items-center gap-6 px-8 py-10 rounded-2xl mx-4 max-w-sm w-full animate-game-over-modal"
         style={{
           background: "linear-gradient(180deg, hsl(225,40%,20%), hsl(225,40%,14%))",
           boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 30px rgba(59,130,246,0.1)",
