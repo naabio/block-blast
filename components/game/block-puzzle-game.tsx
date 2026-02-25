@@ -401,8 +401,6 @@ export function BlockPuzzleGame() {
           dragPiece={draggedPiece}
           dragGridPos={dragGridPos}
           onCellPointerUp={() => {}}
-          blockDropAnimating={blockDropAnimating}
-          invalidPlacementAnimating={invalidPlacementAnimating}
         />
       </div>
 
