@@ -203,11 +203,11 @@ export function calculateScore(
   pieceCellCount: number,
   linesCleared: number
 ): number {
-  // Base points for placing a piece
-  let score = pieceCellCount;
-  // Bonus for clearing lines (with combo multiplier)
+  // Base points for placing a piece (multiplied by 10x)
+  let score = pieceCellCount * 10;
+  // Bonus for clearing lines (with combo multiplier, multiplied by 10x)
   if (linesCleared > 0) {
-    score += linesCleared * GRID_SIZE * linesCleared; // Combo bonus
+    score += linesCleared * GRID_SIZE * linesCleared * 10; // Combo bonus
   }
   return score;
 }
